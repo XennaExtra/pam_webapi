@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tryb prezentacji</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f0f0f0;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+    button {
+      margin: 0.5em;
+      padding: 12px 20px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 8px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    #exitBtn {
+      background: #6c757d;
+      display: none;
+    }
+    .error {
+      color: #b00020;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tryb prezentacji</h1>
+  <p>Po kliknięciu poniższego przycisku ekran przełączy się w poziom i włączy pełny ekran.</p>
+  <button id="enterBtn">Włącz tryb prezentacji</button>
+  <button id="exitBtn">Wyjdź z trybu prezentacji</button>
+  <div id="status"></div>
+  <div id="error" class="error"></div>
+
+  <script>
+    const enterBtn = document.getElementById('enterBtn');
+    const exitBtn = document.getElementById('exitBtn');
+    const statusEl = document.getElementById('status');
+    const errEl = document.getElementById('error');
+
+    async function enterPresentationMode() {
+      errEl.textContent = '';
+      statusEl.textContent = '';
+
+      try {
+        // Włączenie pełnego ekranu
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        }
+
+        // Ustawienie orientacji poziomej (jeśli obsługiwane)
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock('landscape');
+        }
+
+        statusEl.textContent = 'Tryb prezentacji aktywny.';
+        enterBtn.style.display = 'none';
+        exitBtn.style.display = 'inline-block';
+      } catch (err) {
+        errEl.textContent = 'Nie udało się włączyć trybu prezentacji: ' + err.message;
+      }
+    }
+
+    async function exitPresentationMode() {
+      errEl.textContent = '';
+
+      try {
+        // Odblokowanie orientacji
+        if (screen.orientation && screen.orientation.unlock) {
+          screen.orientation.unlock();
+        }
+
+        // Wyłączenie pełnego ekranu
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        }
+
+        statusEl.textContent = 'Tryb prezentacji wyłączony.';
+        enterBtn.style.display = 'inline-block';
+        exitBtn.style.display = 'none';
+      } catch (err) {
+        errEl.textContent = 'Nie udało się wyłączyć trybu prezentacji: ' + err.message;
+      }
+    }
+
+    enterBtn.addEventListener('click', enterPresentationMode);
+    exitBtn.addEventListener('click', exitPresentationMode);
+  </script>
+</body>
+</html>
