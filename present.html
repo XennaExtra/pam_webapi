@@ -59,14 +59,23 @@
       statusEl.textContent = '';
 
       try {
-        // Włączenie pełnego ekranu
-        if (!document.fullscreenElement) {
-          await document.documentElement.requestFullscreen();
+        // Włączenie pełnego ekranu (również Safari i starsze przeglądarki)
+        const el = document.documentElement;
+        const requestFull = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+
+        if (requestFull) {
+          await requestFull.call(el);
+        } else {
+          throw new Error('API Fullscreen nie jest obsługiwane.');
         }
 
         // Ustawienie orientacji poziomej (jeśli obsługiwane)
         if (screen.orientation && screen.orientation.lock) {
-          await screen.orientation.lock('landscape');
+          try {
+            await screen.orientation.lock('landscape');
+          } catch (e) {
+            console.warn('Nie udało się zablokować orientacji:', e);
+          }
         }
 
         statusEl.textContent = 'Tryb prezentacji aktywny.';
@@ -86,9 +95,11 @@
           screen.orientation.unlock();
         }
 
-        // Wyłączenie pełnego ekranu
-        if (document.fullscreenElement) {
-          await document.exitFullscreen();
+        // Wyłączenie pełnego ekranu (również Safari)
+        const exitFull = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+
+        if (exitFull) {
+          await exitFull.call(document);
         }
 
         statusEl.textContent = 'Tryb prezentacji wyłączony.';
