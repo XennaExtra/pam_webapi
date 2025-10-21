@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Moja lokalizacja</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f7f7f7;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+    .coords {
+      font-size: 1.2em;
+      margin: 0.5em 0;
+    }
+    .error {
+      color: #b00020;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Twoja aktualna lokalizacja</h1>
+  <div id="status">Ładuję lokalizację...</div>
+  <div id="latitude" class="coords"></div>
+  <div id="longitude" class="coords"></div>
+  <div id="error" class="error"></div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const latEl = document.getElementById('latitude');
+    const lonEl = document.getElementById('longitude');
+    const errEl = document.getElementById('error');
+
+    function showPosition(pos) {
+      const { latitude, longitude } = pos.coords;
+      statusEl.textContent = 'Pozycja pobrana:';
+      latEl.textContent = 'Latitude: ' + latitude.toFixed(7);
+      lonEl.textContent = 'Longitude: ' + longitude.toFixed(7);
+    }
+
+    function showError(err) {
+      switch (err.code) {
+        case err.PERMISSION_DENIED:
+          errEl.textContent = 'Brak pozwolenia na lokalizację. Włącz dostęp w ustawieniach przeglądarki.';
+          break;
+        case err.POSITION_UNAVAILABLE:
+          errEl.textContent = 'Pozycja niedostępna.';
+          break;
+        case err.TIMEOUT:
+          errEl.textContent = 'Przekroczono limit czasu podczas pobierania lokalizacji.';
+          break;
+        default:
+          errEl.textContent = 'Nieznany błąd: ' + err.message;
+      }
+      statusEl.textContent = 'Błąd';
+    }
+
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(showPosition, showError, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
+    } else {
+      errEl.textContent = 'Twoja przeglądarka nie obsługuje geolokalizacji.';
+    }
+  </script>
+</body>
+</html>
