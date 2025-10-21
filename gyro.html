@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Czujnik ruchu telefonu</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f7f7f7;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+    .coords {
+      font-size: 1.2em;
+      margin: 0.5em 0;
+    }
+    .error {
+      color: #b00020;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Wykrywanie ruchu telefonu</h1>
+  <div id="status">Czekam na dane z czujników...</div>
+  <div id="alpha" class="coords"></div>
+  <div id="beta" class="coords"></div>
+  <div id="gamma" class="coords"></div>
+  <div id="error" class="error"></div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const alphaEl = document.getElementById('alpha');
+    const betaEl = document.getElementById('beta');
+    const gammaEl = document.getElementById('gamma');
+    const errEl = document.getElementById('error');
+
+    function handleOrientation(event) {
+      const { alpha, beta, gamma } = event;
+      statusEl.textContent = 'Dane z czujników:';
+      alphaEl.textContent = 'Alpha (obrót wokół osi Z): ' + alpha.toFixed(2);
+      betaEl.textContent = 'Beta (pochylenie przód-tył): ' + beta.toFixed(2);
+      gammaEl.textContent = 'Gamma (pochylenie lewo-prawo): ' + gamma.toFixed(2);
+    }
+
+    function requestPermissionIfNeeded() {
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS wymaga zgody użytkownika
+        DeviceOrientationEvent.requestPermission()
+          .then(response => {
+            if (response === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+              statusEl.textContent = 'Oczekuję na dane...';
+            } else {
+              errEl.textContent = 'Brak zgody na dostęp do czujników ruchu.';
+            }
+          })
+          .catch(e => {
+            errEl.textContent = 'Błąd przy żądaniu zgody: ' + e.message;
+          });
+      } else {
+        // Android / inne przeglądarki
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+    }
+
+    window.addEventListener('load', requestPermissionIfNeeded);
+  </script>
+</body>
+</html>
