@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wibracja telefonu</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f7f7f7;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+    button {
+      margin-top: 1em;
+      padding: 12px 20px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 8px;
+      background: #007bff;
+      color: white;
+    }
+    .error {
+      color: #b00020;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test wibracji telefonu</h1>
+  <p>Dotknij przycisku, aby telefon zawibrował.</p>
+  <button id="vibrateBtn">Wibruj!</button>
+  <div id="status"></div>
+  <div id="error" class="error"></div>
+
+  <script>
+    const btn = document.getElementById('vibrateBtn');
+    const statusEl = document.getElementById('status');
+    const errEl = document.getElementById('error');
+
+    function vibratePhone() {
+      errEl.textContent = '';
+      statusEl.textContent = '';
+
+      if (!('vibrate' in navigator)) {
+        errEl.textContent = 'Twoje urządzenie lub przeglądarka nie obsługuje wibracji.';
+        return;
+      }
+
+      // Próbujemy wywołać krótką wibrację
+      const success = navigator.vibrate(200);
+
+      if (success) {
+        statusEl.textContent = 'Wibracja uruchomiona!';
+      } else {
+        // iOS Safari często wymaga interakcji użytkownika i ogranicza API
+        errEl.textContent = 'Nie udało się uruchomić wibracji (iOS może blokować tę funkcję).';
+      }
+    }
+
+    btn.addEventListener('click', vibratePhone);
+  </script>
+</body>
+</html>
