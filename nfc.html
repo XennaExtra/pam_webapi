@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Odczyt NFC</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f0f0f0;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+    button {
+      margin-top: 1em;
+      padding: 12px 20px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 8px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    .error {
+      color: #b00020;
+      margin-top: 1em;
+    }
+    #result {
+      margin-top: 1em;
+      font-size: 1.1em;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Odczyt NFC</h1>
+  <p>Kliknij przycisk, aby rozpocząć nasłuchiwanie tagów NFC.</p>
+  <button id="startBtn">Uruchom NFC</button>
+  <div id="result"></div>
+  <div id="error" class="error"></div>
+
+  <script>
+    const startBtn = document.getElementById('startBtn');
+    const resultEl = document.getElementById('result');
+    const errEl = document.getElementById('error');
+
+    async function startNFC() {
+      errEl.textContent = '';
+      resultEl.textContent = '';
+
+      if (!('NDEFReader' in window)) {
+        errEl.textContent = 'Twoja przeglądarka nie obsługuje Web NFC. Użyj Chrome na Androidzie przez HTTPS.';
+        return;
+      }
+
+      try {
+        const ndef = new NDEFReader();
+        await ndef.scan();
+        resultEl.textContent = 'Czekam na zbliżenie tagu NFC...';
+
+        ndef.addEventListener('reading', event => {
+          const { serialNumber, message } = event;
+          let text = `📶 Wykryto tag NFC\nID: ${serialNumber || '(brak ID)'}\n`;
+
+          for (const record of message.records) {
+            if (record.recordType === 'text') {
+              const decoder = new TextDecoder(record.encoding);
+              text += `Tekst: ${decoder.decode(record.data)}\n`;
+            } else if (record.recordType === 'url') {
+              const decoder = new TextDecoder();
+              text += `URL: ${decoder.decode(record.data)}\n`;
+            } else {
+              text += `Inny typ: ${record.recordType}\n`;
+            }
+          }
+
+          resultEl.textContent = text;
+        });
+
+      } catch (err) {
+        errEl.textContent = 'Nie udało się uruchomić NFC: ' + err.message;
+      }
+    }
+
+    startBtn.addEventListener('click', startNFC);
+  </script>
+</body>
+</html>
