@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kamera przednia</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f0f0f0;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+    video {
+      width: 320px;
+      height: 240px;
+      background: #000;
+      border-radius: 12px;
+      object-fit: cover;
+      margin-top: 1em;
+    }
+    button {
+      margin-top: 1em;
+      padding: 12px 20px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 8px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    .error {
+      color: #b00020;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Podgląd z przedniej kamery</h1>
+  <p>Kliknij przycisk, aby włączyć kamerę.</p>
+  <button id="startBtn">Uruchom kamerę</button>
+  <video id="video" autoplay playsinline></video>
+  <div id="error" class="error"></div>
+
+  <script>
+    const startBtn = document.getElementById('startBtn');
+    const video = document.getElementById('video');
+    const errEl = document.getElementById('error');
+
+    async function startCamera() {
+      errEl.textContent = '';
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: 320, height: 240 },
+          audio: false
+        });
+        video.srcObject = stream;
+        startBtn.style.display = 'none';
+      } catch (err) {
+        errEl.textContent = 'Nie udało się uzyskać dostępu do kamery: ' + err.message;
+      }
+    }
+
+    startBtn.addEventListener('click', startCamera);
+  </script>
+</body>
+</html>
